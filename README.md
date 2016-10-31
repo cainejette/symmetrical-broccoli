@@ -1,2 +1,2 @@
-# xkcd
-it's like giphy but for xkcd
+# cowsay
+cowsay for slack

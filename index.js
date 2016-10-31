@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var curl = require('curlrequest');
+var cowsay = require('cowsay');
 
 app.get('/', function (req, res) {
   res.send('hi');
@@ -14,43 +15,45 @@ app.listen(process.env.PORT || 8765, function () {
 app.use(bodyParser());
 
 app.post('/', function (req, res) {
+  console.log(req.body.text);
   if (req.body.text == 'help') {
-    res.send({text: 'type /cowsay [text] to have a cow say it for ya!'});
+    res.send({text: 'type /cowsay [text] to have a cow say it for ya, or /cowsay [animal] [text] to have that animal say it!'});
   } else {
-    cowsay(res, req.body.text, req.body.response_url);
+    cowify(res, req.body.text);
   }
 });
 
-var cowsay = (res, query, response_url) => {
+var cowify = (res, query) => {
   console.log('cowifying: [' + query + ']');
-
-  var options = {
-    'url': 'http://cowsay.morecode.org/say',
-    'method': 'POST',
-    'data': {
-      'message': query,
-      'format': 'json'
-    }
-  };
-
-  curl.request(options, (err, data) => {
-    if (err) {
-      console.log('err!');
-      console.dir(err);
-      handleError(res, err);
+  var words = query.split(' ');
+  var cowified = '';
+  try {
+    if (words.length > 1) {
+      cowified = cowsay.say({
+        'text': words.slice(1).join(' '),
+        'f': words[0]
+      });
     } else {
-      send(res, data, response_url);
+      cowified = cowsay.say({
+        'text': query
+      });
     }
-  });
+    
+    console.log('using animal: ' + words[0]);
+  } catch (err) {
+    console.dir(err);
+    console.log('could not find animal: ' + words[0]);
+    cowified = cowsay.say({
+      'text': query
+    });
+  }
+  send(res, cowified);
 };
 
-var send = (res, data, response_url) => {
-  var results = JSON.parse(data);
-  results.cow = '\n' + results.cow;
-  console.log('results: [' + results.cow + ']');
+var send = (res, data) => {
   var response = {
     'response_type': 'in_channel',
-    'text': '```' + results.cow + '```',
+    'text': '```' + data + '```',
   };
 
   res.send(response);
