@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "cowsay slash command",
   "engines": {
-    "node": "5.8.0"
+    "node": "6.7.0"
   },
   "main": "index.js",
   "scripts": {
