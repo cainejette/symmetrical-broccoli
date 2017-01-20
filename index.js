@@ -5,7 +5,7 @@ var curl = require('curlrequest');
 var cowsay = require('cowsay');
 
 app.get('/', function (req, res) {
-  res.send('hi');
+  res.send('<pre>' + cowsay.say({'text': 'hi'}) + '</pre>');
 });
 
 app.listen(process.env.PORT || 8765, function () {
